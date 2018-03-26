@@ -14,11 +14,14 @@ Python tools for creating an object data base for "Pick and Place" application f
 # Usage examples
 
 get URScript from UR3 robot, and create all json file :
+
   python3 create_data_base.py --pull --create
   
 clear data base :
+
   python3 create_data_base.py --clean
     
 generate URScript for **box** object, for **A** position (corresponds to [0.0, 0.3] in robot coordinates), and send it to the robot :
+
   python3 generate_script.py -o object_models/cube.json -p A --push
   

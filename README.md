@@ -1,10 +1,10 @@
 # Abstract
-Python tools for creating an object data base for "Pick and Place" application for UR3 robot. Generated also URScript for Pick and Place.
+Python tools for creating an object data base for **Pick and Place** application for UR3 robot. Generated also URScript for Pick and Place.
 
 # Repository architecture 
 ## Python scripts :
 + **create_data_base.py** : create a data base from UR3 URSripts.
-+ **generated_script.py** : generate an URScript with specific objet and specific object target location.
++ **generated_script.py** : generate an URScript with specific object and specific object target location.
 
 ## Directories :
 + **learned_objects_scripts/** : contains copied URScripts from robot.

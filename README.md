@@ -1,5 +1,5 @@
 # Abstract
-Python tools for creating an object data base for "Pick and Place" application for UR3 robot.
+Python tools for creating an object data base for "Pick and Place" application for UR3 robot. Generated also URScript for Pick and Place.
 
 # Repository architecture 
 ## Python scripts :

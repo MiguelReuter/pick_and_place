@@ -1,0 +1,163 @@
+    ###########################################
+    #######VisionLocate node start########
+    # $ 105 "Gripper Open (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != 0):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = 0
+      end
+      if (current_force[0] != 0):
+        rq_set_force_norm(0, "1")
+        current_force[0] = 0
+      end
+      rq_set_pos_norm(0, "1")
+      rq_go_to("1")
+      rq_wait("1")
+
+    #$ 106 "Camera Locate"
+    # Offset in translation only.
+    snapshot_position_offset[3] = 0
+    snapshot_position_offset[4] = 0
+    snapshot_position_offset[5] = 0
+    T_camera_in_flange = p[0, 0, 0, 0, 0, 0] # enlever une fois que l'enseignement du modele sera fait en faisant un movetool avec la pose de la camera dans le repere de la flange. Pour l'instant, on suppose que la camera est situee directement sur la flange.
+    tool = get_T_in_base_from_flange(T_camera_in_flange)
+    textmsg("actual tool flange : ", tool)
+    tool = pose_sub(tool, snapshot_position_offset)
+    textmsg("tool after offset : ", tool)
+    snapshot_position = p[0.318486, 0.204112, 0.344222, -2.59231, 0.898578, -0.300813]
+    textmsg("expected snapshot position : ", snapshot_position)
+    diff = pose_sub(tool, snapshot_position)
+    textmsg("diff = ", diff)
+    textmsg("norm([diff[0], diff[1], diff[2]]) = ", norm([diff[0], diff[1], diff[2]]))
+    textmsg("norm([diff[3], diff[4], diff[5]]) = ", norm([diff[3], diff[4], diff[5]]))
+    is_at_snapshot_position = norm([diff[0], diff[1], diff[2]]) < 0.002
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_at_snapshot_position = is_at_snapshot_position and (norm([diff[3], diff[4], diff[5]]) < 0.005)
+    textmsg("is_at_snapshot_position = ", is_at_snapshot_position)
+    is_snapshot_position_offset = norm(snapshot_position_offset) != 0
+    is_at_snapshot_position = is_at_snapshot_position or ignore_snapshot_position
+    if not(is_at_snapshot_position):
+      popup("Robot is not at Snapshot Position. Add Move instruction to Snapshot Position before Camera Locate node.. Error code: [UC-8]", False, False, True)
+      halt
+    end
+    f = xmlrpc_server.findmodel("<value_vision_model>", tool[0], tool[1], tool[2], tool[3], tool[4], tool[5])
+    nbOccu = f[0]
+    logging_service.publish("FIND_MODEL", f)
+    object_teaching_location = p<value_teaching_position>
+    is_ignore_orientation = <value_is_ignore_orientation>
+    if (is_ignore_orientation):
+      object_location = p[f[1], f[2], f[3], object_teaching_location[3], object_teaching_location[4], object_teaching_location[5]]
+      textmsg("object_location before offset = ", object_location)
+      object_location = pose_add(object_location, snapshot_position_offset)
+      textmsg("object_location after offset = ", object_location)
+    else:
+      object_location = p[f[1], f[2], f[3], f[4], f[5], f[6]]
+      textmsg("object_location before offset = ", object_location)
+      object_location = pose_add(object_location, snapshot_position_offset)
+      textmsg("object_location after offset = ", object_location)
+    end
+    feature_teaching_reference = p[0.4013275560348308, 0.27725379949410073, 0.10888234773959296, -2.5923111500221245, 0.8984842215911497, -0.30082568228733936]
+    snapshot_pos = pose_trans(object_location, pose_trans(pose_inv(p<value_new_snapshot_pos_inv>), p<value_new_snapshot_pos>))
+    if (nbOccu > 0.5):
+      #$ 107 "'If an object is located,'"
+      # 'If an object is located,'
+      #$ 108 "'these instructions are executed.'"
+      # 'these instructions are executed.'
+      #$ 109 "MoveL"
+      #$ 110 "'The robot moves relatively'"
+      # 'The robot moves relatively'
+      #$ 111 "'to the located object.'"
+      # 'to the located object.'
+      #$ 112 "Rel_approach"
+      movel(pose_trans(snapshot_pos, p<value_move_approach>), a=1.2, v=0.25)
+      #$ 113 "Rel_pick"
+      movel(pose_trans(snapshot_pos, p<value_move_pick>), a=1.2, v=0.25)
+      #$ 114 "'Enter your gripper instructions here.'"
+      # 'Enter your gripper instructions here.'
+      # begin: URCap Program Node
+      #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.1, Robotiq Inc.
+      #   Type: Gripper
+      #$ 115 "Gripper Close (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != <value_current_speed_0_thr>):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = <value_current_speed_0_thr>
+      end
+      if (current_force[0] != <value_current_force_0_thr>):
+        rq_set_force_norm(0, "1")
+        current_force[0] = <value_current_force_0_thr>
+      end
+      rq_set_pos_norm(100, "1")
+      rq_go_to("1")
+      rq_wait("1")
+      # end: URCap Program Node
+      #$ 116 "Rel_retract"
+      movel(pose_trans(snapshot_pos, p<value_move_retract>), a=1.2, v=0.25)
+      #$ 117 "MoveJ"
+      #$ 118 "'The robot moves to absolute waypoints.'"
+      # 'The robot moves to absolute waypoints.'
+      #$ 119 "Abs_approach"
+      movel(<value_target_move_approach>)
+      #$ 120 "Abs_place"
+      movel(<value_target_move_place>)
+      #$ 121 "'Enter your gripper instructions here.'"
+      # 'Enter your gripper instructions here.'
+      # begin: URCap Program Node
+      #   Source: Robotiq_2-Finger_Adaptive_Gripper, 1.1.1, Robotiq Inc.
+      #   Type: Gripper
+      #$ 122 "Gripper Open (1)"
+      if (connectivity_checked[0] != 1):
+        if not(rq_set_sid(9, "1")):
+          popup("Gripper 1 must be connected to run this program.", False, False, True)
+        end
+        connectivity_checked[0] = 1
+      end
+      if (status_checked[0] != 1):
+        if not(rq_is_gripper_activated("1")):
+          popup("Gripper 1 is not activated. Go to Installaton tab > Gripper to activate it and run the program again.", False, False, True)
+        end
+        status_checked[0] = 1
+      end
+      if (current_speed[0] != 0):
+        rq_set_speed_norm(0, "1")
+        current_speed[0] = 0
+      end
+      if (current_force[0] != 0):
+        rq_set_force_norm(0, "1")
+        current_force[0] = 0
+      end
+      rq_set_pos_norm(0, "1")
+      rq_go_to("1")
+      rq_wait("1")
+      # end: URCap Program Node
+      #$ 123 "Abs_retract"
+      movel(<value_target_move_approach>)
+    end
+    # Restore snapshot position
+    snapshot_pos = p[0.318486, 0.204112, 0.344222, -2.59231, 0.898578, -0.300813]
+    #######VisionLocate node end########
+    ###########################################
+    
+    # end: URCap Program Node

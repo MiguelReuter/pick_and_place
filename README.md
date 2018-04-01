@@ -13,7 +13,7 @@ Python tools for creating an object data base for **Pick and Place** application
 
 # Usage examples
 
-+ get URScript from UR3 robot, and create all json file :
++ get URScript from UR3 robot, and create all json files :
 
     `python3 create_data_base.py --pull --create`
   
